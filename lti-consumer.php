@@ -360,19 +360,52 @@ function add_resource_link_id_if_not_present($shortcode) {
     return '[' . implode(' ', $pieces) . ']';
 }
 
+/**
+ * [get_current_lti_role description]
+ * @author Antoni Bertran <antoni@tresipunt.com>
+ * @param  [type] $userRole [description]
+ * @return [type]           [description]
+ */
+function get_current_lti_role($userRole) {
+    $role = key($userRole);
+    
+    switch($role) {
+        case 'administrator':
+            $role = 'administrator';
+        break;
+        case ('editor'||'author'): 
+            $role = 'instructor';
+        break;
+        case 'contributor':
+            $role = 'learner';
+        break;
+
+        default:
+            $role = 'guest';
+        break;
+    }
+    return $role;
+}
+
 /*
  * Utilities
  */
 function extract_user_id() {
-    // Find some relevant information about the current user
-    $current_user = wp_get_current_user();
-
-    return array(
-        'user_id' => $current_user->ID,
-        'lis_person_contact_email_primary' => $current_user->user_email,
-        'lis_person_name_given' => $current_user->user_firstname,
-        'lis_person_name_family' => $current_user->user_lastname,
-    );
+    if ( is_user_logged_in() ) {
+        // Find some relevant information about the current user
+        $current_user_obj =  get_userdata(wp_get_current_user()->ID);
+        $userRole = ($current_user_obj->roles);
+        $current_user = $current_user_obj->data;
+        return array(
+            'user_id' => $current_user->ID,
+            'roles'  => get_current_lti_role($userRole),
+            'lis_person_contact_email_primary' => $current_user->user_email,
+            'lis_person_name_given' => isset($current_user->user_firstname)?$current_user->user_firstname:$current_user->display_name,
+            'lis_person_name_family' => isset($current_user->user_lastname)?$current_user->user_lastname:$current_user->display_name,
+        );
+    } else {
+        return array();
+    }
 }
 
 function extract_site_id() {
