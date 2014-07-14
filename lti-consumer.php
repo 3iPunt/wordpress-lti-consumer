@@ -113,6 +113,7 @@ function lti_content_inner_custom_box($lti_content) {
         <label>Open in a new browser window <input type="radio" <?php checked($display, 'newwindow'); ?> id="lti_content_field_display_newwindow" name="lti_content_field_display" value="newwindow" /></label><br>
         <label>Inline in an iframe <input type="radio" <?php checked($display, 'iframe'); ?> id="lti_content_field_display_iframe" name="lti_content_field_display" value="iframe" /></label><br>
         <label>Open in the current browser window <input type="radio" <?php checked($display, 'self'); ?> id="lti_content_field_display_self" name="lti_content_field_display" value="self" /></label>
+        <label>Open in modal <input type="radio" <?php checked($display, 'modal'); ?> id="lti_content_field_display_modal" name="lti_content_field_display" value="modal" /></label>
       </td>
     </tr>
 
@@ -227,12 +228,12 @@ function lti_launch_func($attrs) {
         $html = '';
         $id = uniqid();
         $iframeId = uniqid();
-
+       
         if ( $data['display'] == 'newwindow' ) {
             $target = '_blank';
         } else if ( $data['display'] == 'iframe' ) {
             $target = 'frame-' . $iframeId;
-        } else {
+        }else {
             $target = '_self';
         }
 
@@ -241,6 +242,7 @@ function lti_launch_func($attrs) {
         } else {
             $autolaunch = 'no';
         }
+
 
         $html .= "<form method=\"post\" action=\"$data[url]\" target=\"$target\" id=\"launch-$id\" data-id=\"$id\" data-post=\"$data[id]\" data-auto-launch=\"$autolaunch\">";
         foreach ( $data['parameters'] as $key => $value ) {
@@ -253,13 +255,49 @@ function lti_launch_func($attrs) {
             if ( $data['id'] ) {
                 do_action('lti_launch', $data['id']);
             }
-        } else if ( $data['action'] == 'link' ) {
-            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\')">Launch ' . $data['text'] . '</a>';
-        } else {
-            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\')">Launch ' . $data['text'] . '</button>';
-        }
 
-        $html .= '</form>';
+        }else if ( $data['display'] == 'modal' ) {
+            wp_enqueue_style( 'bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' );
+            wp_enqueue_style( 'bootstrap-theme', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css' );
+
+       
+            //wp_enqueue_script('lti_launch_bootstrap', '', array('jquery'));
+            wp_register_script( 'bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js', array('jquery'), 3.3, true); 
+            wp_enqueue_script('bootstrap'); 
+            $html .= '</form>
+<button class="btn btn-primary" data-toggle="modal" data-target="#modal'.$id.'" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">
+  Launch demo modal
+</button>
+<div class="modal fade" id="modal'.$id.'" tabindex="-1" role="dialog" aria-labelledby="modalLabel'.$id.'" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">'.$id.'</h4>
+      </div>
+      <div class="modal-body">
+
+       <form  method="post" action="'.$data[url].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
+       </form> 
+       <iframe style="width: 100%; height: 55em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
+            
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+            <a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">Launch ' . $data['text'] . '</a>';
+        
+        }else if ( $data['action'] == 'link' ) {
+            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false)">Launch ' . $data['text'] . '</a>';
+        } else {
+            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false)">Launch ' . $data['text'] . '</button>';
+        }
+        if ( $data['display'] != 'modal' )
+            $html .= '</form>';
     }
 
     return $html;
@@ -269,8 +307,8 @@ function lti_launch_func($attrs) {
 add_action('wp_head', 'lti_launch_ajaxurl');
 function lti_launch_ajaxurl() {
 ?>
-        <script type="text/javascript">
-        var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+<script type="text/javascript">
+var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
 </script>
 <?php
 }
@@ -580,3 +618,11 @@ function package_launch($version, $key, $secret, $launch_url, $parameters) {
         new OAuthSignatureMethod_HMAC_SHA1(), $consumer, null);
     return $oauth_request->get_parameters();
 };
+
+add_action( 'wp_ajax_lti_launch', 'ajax_lti_launch' );
+function ajax_lti_launch(){
+    $attrs = array('id' =>  $_POST['id'], 'resource_link_id' =>  $_POST['resource_link_id'] );
+    
+    die(json_encode(lti_launch_process($attrs)));
+
+}
