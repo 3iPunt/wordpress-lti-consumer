@@ -264,16 +264,20 @@ function lti_launch_func($attrs) {
             //wp_enqueue_script('lti_launch_bootstrap', '', array('jquery'));
             wp_register_script( 'bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
-            $html .= '</form>
-<button class="btn btn-primary" data-toggle="modal" data-target="#modal'.$id.'" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">
-  Launch demo modal
-</button>
-<div class="modal fade" id="modal'.$id.'" tabindex="-1" role="dialog" aria-labelledby="modalLabel'.$id.'" aria-hidden="true">
+            $html .= '</form>';
+            if ( $data['action'] == 'link' ) {
+                $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">Launch ' . $data['text'] . '</a>';
+            } else {
+                $html .= '<button class="btn btn-primary" data-toggle="modal" data-target="#modal'.$id.'" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">
+    Launch ' . $data['text'] . '</button>';
+            }
+
+ $html .= '<div class="modal fade" id="modal'.$id.'" tabindex="-1" role="dialog" aria-labelledby="modalLabel'.$id.'" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">'.$id.'</h4>
+        <!--h4 class="modal-title" id="myModalLabel">'.$id.'</h4-->
       </div>
       <div class="modal-body">
 
@@ -284,13 +288,12 @@ function lti_launch_func($attrs) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <!--button type="button" class="btn btn-primary">Save changes</button-->
       </div>
     </div>
   </div>
-</div>
-            <a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">Launch ' . $data['text'] . '</a>';
-        
+</div>';
+           
         }else if ( $data['action'] == 'link' ) {
             $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false)">Launch ' . $data['text'] . '</a>';
         } else {
@@ -437,6 +440,12 @@ function extract_user_id() {
         return array(
             'user_id' => $current_user->ID,
             'roles'  => get_current_lti_role($userRole),
+
+'launch_presentation_locale'=>'ca-ES',
+//Language, country and variant as represented using the IETF Best Practices for Tags for Identifying Languages (BCP-47) available at http://www.rfc-editor.org/rfc/bcp/bcp47.txt
+
+//launch_presentation_document_target=iframe
+//The value should be either ‘frame’, ‘iframe’ or ‘window’.  This field communicates the kind of browser window/frame where the TC has launched the tool.  The TP can ignore this parameter and detect its environment through JavaScript, but this parameter gives the TP the information without requiring the use of JavaScript if the tool prefers. This parameter is recommended.
             'lis_person_contact_email_primary' => $current_user->user_email,
             'lis_person_name_given' => isset($current_user->user_firstname)?$current_user->user_firstname:$current_user->display_name,
             'lis_person_name_family' => isset($current_user->user_lastname)?$current_user->user_lastname:$current_user->display_name,
@@ -449,7 +458,9 @@ function extract_user_id() {
 function extract_site_id() {
     // Find some relevant information about the site
     return array(
-        'context_id' => basename(get_permalink()),
+        'context_id' =>  get_current_blog_id().(the_ID()!=null?the_ID():''),
+        'context_name' => get_bloginfo('name'),//basename(get_permalink()),
+        'context_label' => get_bloginfo('name'),//basename(get_permalink()),
         'tool_consumer_instance_url' => get_site_url(),
     );
 }

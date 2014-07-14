@@ -1,8 +1,6 @@
 function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal) {
   var form = jQuery('form#launch-' + id);
 
-  alert(is_modal);
-
   if ( form.data('post') !== '' ) {
     jQuery.post(
       ajaxurl,
