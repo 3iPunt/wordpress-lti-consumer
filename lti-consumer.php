@@ -257,12 +257,12 @@ function lti_launch_func($attrs) {
             }
 
         }else if ( $data['display'] == 'modal' ) {
-            wp_enqueue_style( 'bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' );
-            wp_enqueue_style( 'bootstrap-theme', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css' );
+            wp_enqueue_style( 'bootstrap', 'http://getbootstrap.com/dist/css/bootstrap.min.css' );
+           // wp_enqueue_style( 'bootstrap-theme', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css' );
 
        
             //wp_enqueue_script('lti_launch_bootstrap', '', array('jquery'));
-            wp_register_script( 'bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js', array('jquery'), 3.3, true); 
+            wp_register_script( 'bootstrap', 'http://getbootstrap.com/dist/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
             $html .= '</form>';
             if ( $data['action'] == 'link' ) {
@@ -274,34 +274,35 @@ function lti_launch_func($attrs) {
 
        
 
-         $html .= '<div class="modal fade" id="modal'.$id.'" tabindex="-1" role="dialog" aria-labelledby="modalLabel'.$id.'" aria-hidden="true">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <!--h4 class="modal-title" id="myModalLabel">'.$id.'</h4-->
-              </div>
-              <div class="modal-body">
+         $html .= '
+        <div style="display: none;" class="modal fade bs-example-modal-lg" id="modal'.$id.'"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
 
-               <form  method="post" action="'.$data[url].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                  <h4 class="modal-title" id="myLargeModalLabel">Large modal</h4>
+                </div>
+                <div class="modal-body">
+                   <form  method="post" action="'.$data[url].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
                </form> 
-               <iframe style="width: 100%; height: 55em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
-                    
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <!--button type="button" class="btn btn-primary">Save changes</button-->
-              </div>
-            </div>
-          </div>
+               <iframe style="width: 100%; height: 25em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
+               
+                </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <!--button type="button" class="btn btn-primary">Save changes</button-->
+                  </div>
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
         </div>
         <script>
         jQuery(document).ready(function(){
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
                 if (confirm("carregar? ")) lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
                    
-                   jQuery(this).find(".modal-dialog").css({
-                              width:"40%", 
+                   /*jQuery(this).find(".modal-dialog").css({
+                              width:"30%", 
                               height:"100%", 
                               "padding":"0"
                     });
@@ -314,7 +315,7 @@ function lti_launch_func($attrs) {
                               width:"auto",
                               height:"100%", 
                               "padding":"0"
-                    });
+                    });*/
 
             });
          });
