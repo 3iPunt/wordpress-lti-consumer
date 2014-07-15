@@ -266,33 +266,46 @@ function lti_launch_func($attrs) {
             wp_enqueue_script('bootstrap'); 
             $html .= '</form>';
             if ( $data['action'] == 'link' ) {
-                $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">Launch ' . $data['text'] . '</a>';
+                 $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'">Launch ' . $data['text'] . '</a>';
             } else {
-                $html .= '<button class="btn btn-primary" data-toggle="modal" data-target="#modal'.$id.'" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', true )">
+                $html .= '<button class="btn btn-primary" data-toggle="modal" data-target="#modal'.$id.'">
     Launch ' . $data['text'] . '</button>';
             }
 
- $html .= '<div class="modal fade" id="modal'.$id.'" tabindex="-1" role="dialog" aria-labelledby="modalLabel'.$id.'" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <!--h4 class="modal-title" id="myModalLabel">'.$id.'</h4-->
-      </div>
-      <div class="modal-body">
+       
 
-       <form  method="post" action="'.$data[url].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
-       </form> 
-       <iframe style="width: 100%; height: 55em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
-            
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <!--button type="button" class="btn btn-primary">Save changes</button-->
-      </div>
-    </div>
-  </div>
-</div>';
+         $html .= '<div class="modal fade" id="modal'.$id.'" tabindex="-1" role="dialog" aria-labelledby="modalLabel'.$id.'" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <!--h4 class="modal-title" id="myModalLabel">'.$id.'</h4-->
+              </div>
+              <div class="modal-body">
+
+               <form  method="post" action="'.$data[url].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
+               </form> 
+               <iframe style="width: 100%; height: 55em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
+                    
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <!--button type="button" class="btn btn-primary">Save changes</button-->
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+        jQuery(document).ready(function(){
+            jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
+                if (confirm("carregar? "))
+                    lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
+              
+            });
+         });
+        </script>
+
+        ';
            
         }else if ( $data['action'] == 'link' ) {
             $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false)">Launch ' . $data['text'] . '</a>';
@@ -437,15 +450,17 @@ function extract_user_id() {
         $current_user_obj =  get_userdata(wp_get_current_user()->ID);
         $userRole = ($current_user_obj->roles);
         $current_user = $current_user_obj->data;
+        //$lpl = get_bloginfo('language');
+        //echo $lpl.'<br>';
         return array(
             'user_id' => $current_user->ID,
             'roles'  => get_current_lti_role($userRole),
 
-'launch_presentation_locale'=>'ca-ES',
-//Language, country and variant as represented using the IETF Best Practices for Tags for Identifying Languages (BCP-47) available at http://www.rfc-editor.org/rfc/bcp/bcp47.txt
+            'launch_presentation_locale'=>get_bloginfo('language'),
+            //Language, country and variant as represented using the IETF Best Practices for Tags for Identifying Languages (BCP-47) available at http://www.rfc-editor.org/rfc/bcp/bcp47.txt
 
-//launch_presentation_document_target=iframe
-//The value should be either ‘frame’, ‘iframe’ or ‘window’.  This field communicates the kind of browser window/frame where the TC has launched the tool.  The TP can ignore this parameter and detect its environment through JavaScript, but this parameter gives the TP the information without requiring the use of JavaScript if the tool prefers. This parameter is recommended.
+            //launch_presentation_document_target=iframe
+            //The value should be either ‘frame’, ‘iframe’ or ‘window’.  This field communicates the kind of browser window/frame where the TC has launched the tool.  The TP can ignore this parameter and detect its environment through JavaScript, but this parameter gives the TP the information without requiring the use of JavaScript if the tool prefers. This parameter is recommended.
             'lis_person_contact_email_primary' => $current_user->user_email,
             'lis_person_name_given' => isset($current_user->user_firstname)?$current_user->user_firstname:$current_user->display_name,
             'lis_person_name_family' => isset($current_user->user_lastname)?$current_user->user_lastname:$current_user->display_name,

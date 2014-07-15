@@ -17,7 +17,7 @@ function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal) {
       //console.log(object);
 
       //2.set form parameters
-
+      
       jQuery.each( object.parameters, function( key, value ) {
         
         console.log( key + ": " + value );
