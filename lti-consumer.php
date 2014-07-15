@@ -112,7 +112,7 @@ function lti_content_inner_custom_box($lti_content) {
       <td>
         <label>Open in a new browser window <input type="radio" <?php checked($display, 'newwindow'); ?> id="lti_content_field_display_newwindow" name="lti_content_field_display" value="newwindow" /></label><br>
         <label>Inline in an iframe <input type="radio" <?php checked($display, 'iframe'); ?> id="lti_content_field_display_iframe" name="lti_content_field_display" value="iframe" /></label><br>
-        <label>Open in the current browser window <input type="radio" <?php checked($display, 'self'); ?> id="lti_content_field_display_self" name="lti_content_field_display" value="self" /></label>
+        <label>Open in the current browser window <input type="radio" <?php checked($display, 'self'); ?> id="lti_content_field_display_self" name="lti_content_field_display" value="self" /></label><br>
         <label>Open in modal <input type="radio" <?php checked($display, 'modal'); ?> id="lti_content_field_display_modal" name="lti_content_field_display" value="modal" /></label>
       </td>
     </tr>
@@ -298,9 +298,24 @@ function lti_launch_func($attrs) {
         <script>
         jQuery(document).ready(function(){
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
-                if (confirm("carregar? "))
-                    lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
-              
+                if (confirm("carregar? ")) lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
+                   
+                   jQuery(this).find(".modal-dialog").css({
+                              width:"40%", 
+                              height:"100%", 
+                              "padding":"0"
+                    });
+                    jQuery(this).find(".modal-content").css({
+                              height:"100%", 
+                              "border-radius":"0",
+                              "padding":"0"
+                    });
+                    jQuery(this).find(".modal-body").css({
+                              width:"auto",
+                              height:"100%", 
+                              "padding":"0"
+                    });
+
             });
          });
         </script>
