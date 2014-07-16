@@ -115,19 +115,22 @@ function lti_content_inner_custom_box($lti_content) {
         <label>Inline in an iframe <input type="radio" <?php checked($display, 'iframe'); ?> id="lti_content_field_display_iframe" name="lti_content_field_display" value="iframe" /></label><br>
         <label>Open in the current browser window <input type="radio" <?php checked($display, 'self'); ?> id="lti_content_field_display_self" name="lti_content_field_display" value="self" /></label><br>
         <label>Open in modal <input type="radio" <?php checked($display, 'modal'); ?> id="lti_content_field_display_modal" name="lti_content_field_display" value="modal" /></label>
-        <div id="show-me-textbox">Modal height: <input type="text" id="alturamodal" name="lti_content_field_height_modal" size="7" value="<?php echo esc_attr($height_modal);?>"> em</div><br>
+        <div id="show-me-textbox">Modal height: <input type="text" id="lti_content_field_height_modal" name="lti_content_field_height_modal" size="7" value="<?php echo esc_attr($height_modal);?>"> em</div><br>
         <script>
 
              jQuery(document).ready(function(){
                 jQuery('#post').change(function(){
-                    if (jQuery('#lti_content_field_display_modal').prop('checked')) {
+                    showModalHeight();
+                });
+                showModalHeight();
+             });
+             function showModalHeight(){
+                 if (jQuery('#lti_content_field_display_modal').prop('checked')) {
                         jQuery('#show-me-textbox').show();
                     } else {
                         jQuery('#show-me-textbox').hide();
                     }
-                });
-
-             });
+             }
 
         </script>
       </td>
