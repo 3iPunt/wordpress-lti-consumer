@@ -29,6 +29,8 @@ Options:
 
   - iframe: launches into an iframe embedded in the content
 
+  - modal: launches into an iframe embedded in the content with an input textbox that indicates the height of the iframe ('em').
+
 - action
 
   - button: shows a button to the user, which they click on to launch

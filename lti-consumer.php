@@ -83,6 +83,7 @@ function lti_content_inner_custom_box($lti_content) {
     $consumer_key = get_post_meta($lti_content->ID, '_lti_meta_consumer_key', true);
     $secret_key = get_post_meta($lti_content->ID, '_lti_meta_secret_key', true);
     $display = get_post_meta($lti_content->ID, '_lti_meta_display', true);
+    $height_modal = get_post_meta($lti_content->ID,'_lti_meta_height_modal',true);
     $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
     $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
     $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
@@ -114,6 +115,21 @@ function lti_content_inner_custom_box($lti_content) {
         <label>Inline in an iframe <input type="radio" <?php checked($display, 'iframe'); ?> id="lti_content_field_display_iframe" name="lti_content_field_display" value="iframe" /></label><br>
         <label>Open in the current browser window <input type="radio" <?php checked($display, 'self'); ?> id="lti_content_field_display_self" name="lti_content_field_display" value="self" /></label><br>
         <label>Open in modal <input type="radio" <?php checked($display, 'modal'); ?> id="lti_content_field_display_modal" name="lti_content_field_display" value="modal" /></label>
+        <div id="show-me-textbox">Modal height: <input type="text" id="alturamodal" name="lti_content_field_height_modal" size="7" value="<?php echo esc_attr($height_modal);?>"> em</div><br>
+        <script>
+
+             jQuery(document).ready(function(){
+                jQuery('#post').change(function(){
+                    if (jQuery('#lti_content_field_display_modal').prop('checked')) {
+                        jQuery('#show-me-textbox').show();
+                    } else {
+                        jQuery('#show-me-textbox').hide();
+                    }
+                });
+
+             });
+
+        </script>
       </td>
     </tr>
 
@@ -196,6 +212,7 @@ function lti_content_save_post($post_id) {
     $consumer_key = sanitize_text_field($_POST['lti_content_field_consumer_key']);
     $secret_key = sanitize_text_field($_POST['lti_content_field_secret_key']);
     $display = sanitize_text_field($_POST['lti_content_field_display']);
+    $height_modal = sanitize_text_field($_POST['lti_content_field_height_modal']);
     $action = sanitize_text_field($_POST['lti_content_field_action']);
     $launch_url = sanitize_text_field($_POST['lti_content_field_launch_url']);
     $configuration_url = sanitize_text_field($_POST['lti_content_field_configuration_url']);
@@ -206,6 +223,7 @@ function lti_content_save_post($post_id) {
     update_post_meta($post_id, '_lti_meta_consumer_key', $consumer_key);
     update_post_meta($post_id, '_lti_meta_secret_key', $secret_key);
     update_post_meta($post_id, '_lti_meta_display', $display);
+    update_post_meta($post_id, '_lti_meta_height_modal',$height_modal);
     update_post_meta($post_id, '_lti_meta_action', $action);
     update_post_meta($post_id, '_lti_meta_launch_url', $launch_url);
     update_post_meta($post_id, '_lti_meta_configuration_url', $configuration_url);
@@ -229,6 +247,7 @@ function lti_launch_func($attrs) {
         $id = uniqid();
         $iframeId = uniqid();
        
+        
         if ( $data['display'] == 'newwindow' ) {
             $target = '_blank';
         } else if ( $data['display'] == 'iframe' ) {
@@ -273,20 +292,18 @@ function lti_launch_func($attrs) {
             }
 
        
-
          $html .= '
         <div style="display: none;" class="modal fade bs-example-modal-lg" id="modal'.$id.'"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
               <div class="modal-content">
-
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
                   <h4 class="modal-title" id="myLargeModalLabel">Large modal</h4>
                 </div>
                 <div class="modal-body">
-                   <form  method="post" action="'.$data[url].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
+                   <form  method="post" action="'.$data['url'].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
                </form> 
-               <iframe style="width: 100%; height: 25em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
+               <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
                
                 </div>
                   <div class="modal-footer">
@@ -299,7 +316,7 @@ function lti_launch_func($attrs) {
         <script>
         jQuery(document).ready(function(){
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
-                if (confirm("carregar? ")) lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
+                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
                    
                    /*jQuery(this).find(".modal-dialog").css({
                               width:"30%", 
@@ -560,6 +577,7 @@ function lti_launch_process($attrs) {
                 $consumer_key = get_post_meta($lti_content->ID, '_lti_meta_consumer_key', true);
                 $consumer_secret = get_post_meta($lti_content->ID, '_lti_meta_secret_key', true);
                 $display = get_post_meta($lti_content->ID, '_lti_meta_display', true);
+                $height_modal = get_post_meta($lti_content->ID, '_lti_meta_height_modal', true);
                 $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
                 $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
                 $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
@@ -640,6 +658,7 @@ function lti_launch_process($attrs) {
                 $parameters),
             'id' => $post_id,
             'display' => $display,
+            'heightModal'=>$height_modal,
             'action' => $action,
             'url' => $launch_url,
             'text' => $text,
