@@ -24,9 +24,9 @@ function lti_consumer_comment_form($post_id)
     $args = array( 'post_type' => 'lti_launch');
     $loop = new WP_Query( $args );
     while ( $loop->have_posts() ) : $loop->the_post();
-        $add_in_comments_and_post = get_post_meta(the_ID(),'_lti_meta_add_in_comments_and_post',0);
+        $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',0);
         if ($add_in_comments_and_post) {
-            echo lti_launch_func(array('id' => the_ID()));
+            echo lti_launch_func(array('id' => get_the_ID()));
         }    
     endwhile;
 }
@@ -538,7 +538,7 @@ function extract_user_id() {
 function extract_site_id() {
     // Find some relevant information about the site
     return array(
-        'context_id' =>  get_current_blog_id().(the_ID()!=null?the_ID():''),
+        'context_id' =>  get_current_blog_id().(get_the_ID()!=null?get_the_ID():''),
         'context_name' => get_bloginfo('name'),//basename(get_permalink()),
         'context_label' => get_bloginfo('name'),//basename(get_permalink()),
         'tool_consumer_instance_url' => get_site_url(),
