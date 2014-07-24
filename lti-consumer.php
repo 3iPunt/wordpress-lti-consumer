@@ -306,8 +306,8 @@ function lti_launch_func($attrs) {
         }else if ( $data['display'] == 'modal' ) {
             wp_enqueue_style( 'bootstrap', 'http://getbootstrap.com/dist/css/bootstrap.min.css' );
 
-            if ($data['add_in_comments_and_post']) {
-                $html .= '&nbsp;';
+            if ($data['is_in_comments']) { //close 
+                $html .= '</form>&nbsp;';
             }
             wp_register_script( 'bootstrap', 'http://getbootstrap.com/dist/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
@@ -343,7 +343,7 @@ function lti_launch_func($attrs) {
         <script>
         jQuery(document).ready(function(){
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
-                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true);
+                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].');
                    
                    /*jQuery(this).find(".modal-dialog").css({
                               width:"30%", 
@@ -368,9 +368,9 @@ function lti_launch_func($attrs) {
         ';
            
         }else if ( $data['action'] == 'link' ) {
-            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false)">Launch ' . $data['text'] . '</a>';
+            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false, '.$data['is_in_comments'].')">Launch ' . $data['text'] . '</a>';
         } else {
-            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false)">Launch ' . $data['text'] . '</button>';
+            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false, '.$data['is_in_comments'].')">Launch ' . $data['text'] . '</button>';
         }
         $html .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
         foreach ( $data['parameters'] as $key => $value ) {
@@ -596,6 +596,7 @@ function lti_launch_process($attrs) {
         $text = '';
 
         $posts = false;
+        $is_in_comments = false;
 
         if ( array_key_exists('id', $attrs) ) {
             $posts = get_posts(array(
@@ -611,6 +612,7 @@ function lti_launch_process($attrs) {
                 'post_status' => 'publish',
                 'posts_per_page' => 1,
             ));
+            $is_in_comments = true;
         }
 
         if ( $posts ) {
@@ -707,7 +709,7 @@ function lti_launch_process($attrs) {
             'action' => $action,
             'url' => $launch_url,
             'text' => $text,
-            'add_in_comments_and_post' => $add_in_comments_and_post
+            'is_in_comments' => $is_in_comments
         );
     }
 }
@@ -728,7 +730,12 @@ function package_launch($version, $key, $secret, $launch_url, $parameters) {
 
 add_action( 'wp_ajax_lti_launch', 'ajax_lti_launch' );
 function ajax_lti_launch(){
-    $attrs = array('id' =>  $_POST['id'], 'resource_link_id' =>  $_POST['resource_link_id'] );
+    $attrs = array('resource_link_id' =>  $_POST['resource_link_id'] );
+    if ($_POST['is_in_comments']=='true' && isset(_POST['internal_id'])) {
+        $attrs['internal_id']  =  $_POST['internal_id'];
+    } else {
+        $attrs['id']  =  $_POST['id'];
+    }
     
     die(json_encode(lti_launch_process($attrs)));
 

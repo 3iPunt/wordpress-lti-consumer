@@ -1,10 +1,10 @@
-function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal) {
+function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_comments) {
   var form = jQuery('form#launch-' + id);
 
   if ( form.data('post') !== '' ) {
     jQuery.post(
       ajaxurl,
-      {action: 'lti_launch', id: id_lti,  resource_link_id: resource_link_id_val}
+      {action: 'lti_launch', id: id_lti,  resource_link_id: resource_link_id_val, internal_id: id, is_in_comments: is_in_comments}
     ).done( function(data){
       //1.json decode data array
       var object = JSON.parse(data);
