@@ -20,7 +20,7 @@ if ( is_user_logged_in() ) {
     add_action('comment_form', 'lti_consumer_comment_form');
 }
 
-var $arrayLTIModal = array();
+$arrayLTIModal = array();
 
 function lti_consumer_comment_form($post_id) 
 {
