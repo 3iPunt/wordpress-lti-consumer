@@ -1,6 +1,6 @@
 function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_comments, internal_id) {
   var form = jQuery('form#launch-' + id);
-
+    jQuery("#iframe-modal-"+id).html("<i class='icon-spinner icon-spin icon-large'></i>");
     jQuery.post(
       ajaxurl,
       {action: 'lti_launch', id: id_lti,  resource_link_id: resource_link_id_val, internal_id: internal_id, is_in_comments: is_in_comments}

@@ -336,7 +336,7 @@ function lti_launch_func($attrs) {
                 <div class="modal-body" id="modal-body-'.$id.'">
                    <form  method="post" action="'.$data['url'].'" target="iframe-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'">
                    </form> 
-                   <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="iframe-' . $iframeId . '"></iframe>
+                   <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="iframe-' . $iframeId . '" id="iframe-modal-'.$id.'"></iframe>
                    
                 </div>
                   <div class="modal-footer">
