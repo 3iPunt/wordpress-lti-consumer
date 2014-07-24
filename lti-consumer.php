@@ -731,7 +731,7 @@ function package_launch($version, $key, $secret, $launch_url, $parameters) {
 add_action( 'wp_ajax_lti_launch', 'ajax_lti_launch' );
 function ajax_lti_launch(){
     $attrs = array('resource_link_id' =>  $_POST['resource_link_id'] );
-    if ($_POST['is_in_comments']=='true' && isset(_POST['internal_id'])) {
+    if ($_POST['is_in_comments']=='true' && isset($_POST['internal_id'])) {
         $attrs['internal_id']  =  $_POST['internal_id'];
     } else {
         $attrs['id']  =  $_POST['id'];
