@@ -16,7 +16,9 @@ require('OAuth.php');
  * Create the lti_launch custom post type.
  */
 add_action('init', 'create_lti_post_type_func');
-add_action('comment_form', 'lti_consumer_comment_form');
+if ( is_user_logged_in() ) {
+    add_action('comment_form', 'lti_consumer_comment_form');
+}
 
 function lti_consumer_comment_form($post_id) 
 {
@@ -26,7 +28,7 @@ function lti_consumer_comment_form($post_id)
     while ( $loop->have_posts() ) : $loop->the_post();
         $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',0);
         if ($add_in_comments_and_post) {
-            echo lti_launch_func(array('id' => get_the_ID()));
+            echo lti_launch_func(array('id' => get_the_ID(), 'resource_link_id' => get_current_blog_id().'_'.$post_id));
         }    
     endwhile;
 }
