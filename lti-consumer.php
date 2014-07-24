@@ -297,10 +297,6 @@ function lti_launch_func($attrs) {
         }
 
 
-        $html .= "<form method=\"post\" action=\"$data[url]\" target=\"$target\" id=\"launch-$id\" data-id=\"$id\" data-post=\"$data[id]\" data-auto-launch=\"$autolaunch\">";
-        foreach ( $data['parameters'] as $key => $value ) {
-            $html .= "<input type=\"hidden\" name=\"$key\" value=\"$value\">";
-        }
 
         if ( $data['display'] == 'iframe' ) {
             $html .= '<iframe style="width: 100%; height: 55em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>';
@@ -317,7 +313,6 @@ function lti_launch_func($attrs) {
             //wp_enqueue_script('lti_launch_bootstrap', '', array('jquery'));
             wp_register_script( 'bootstrap', 'http://getbootstrap.com/dist/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
-            $html .= '</form>';
             if ( $data['action'] == 'link' ) {
                  $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'">Launch ' . $data['text'] . '</a>';
             } else {
@@ -379,6 +374,11 @@ function lti_launch_func($attrs) {
         } else {
             $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false)">Launch ' . $data['text'] . '</button>';
         }
+        $html .= "<form method=\"post\" action=\"$data[url]\" target=\"$target\" id=\"launch-$id\" data-id=\"$id\" data-post=\"$data[id]\" data-auto-launch=\"$autolaunch\">";
+        foreach ( $data['parameters'] as $key => $value ) {
+            $html .= "<input type=\"hidden\" name=\"$key\" value=\"$value\">";
+        }
+
         if ( $data['display'] != 'modal' )
             $html .= '</form>';
     }
