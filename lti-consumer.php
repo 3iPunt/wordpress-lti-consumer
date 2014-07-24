@@ -296,8 +296,6 @@ function lti_launch_func($attrs) {
             $autolaunch = 'no';
         }
 
-
-
         if ( $data['display'] == 'iframe' ) {
             $html .= '<iframe style="width: 100%; height: 55em;" class="launch-frame" name="frame-' . $iframeId . '"></iframe>';
             // Immediately send the lti_launch action when showing the iframe.
@@ -307,10 +305,10 @@ function lti_launch_func($attrs) {
 
         }else if ( $data['display'] == 'modal' ) {
             wp_enqueue_style( 'bootstrap', 'http://getbootstrap.com/dist/css/bootstrap.min.css' );
-           // wp_enqueue_style( 'bootstrap-theme', '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css' );
 
-       
-            //wp_enqueue_script('lti_launch_bootstrap', '', array('jquery'));
+            if ($data['add_in_comments_and_post']) {
+                $html .= '&nbsp;';
+            }
             wp_register_script( 'bootstrap', 'http://getbootstrap.com/dist/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
             if ( $data['action'] == 'link' ) {
@@ -327,7 +325,7 @@ function lti_launch_func($attrs) {
               <div class="modal-content">
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                  <h4 class="modal-title" id="myLargeModalLabel">'.$data['text'].'</h4>
+                  <h4 class="modal-title" id="myLargeModalLabel'.$id.'">'.$data['text'].'</h4>
                 </div>
                 <div class="modal-body">
                    <form  method="post" action="'.$data['url'].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
@@ -374,9 +372,9 @@ function lti_launch_func($attrs) {
         } else {
             $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false)">Launch ' . $data['text'] . '</button>';
         }
-        $html .= "<form method=\"post\" action=\"$data[url]\" target=\"$target\" id=\"launch-$id\" data-id=\"$id\" data-post=\"$data[id]\" data-auto-launch=\"$autolaunch\">";
+        $html .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
         foreach ( $data['parameters'] as $key => $value ) {
-            $html .= "<input type=\"hidden\" name=\"$key\" value=\"$value\">";
+            $html .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
         }
 
         if ( $data['display'] != 'modal' )
@@ -709,6 +707,7 @@ function lti_launch_process($attrs) {
             'action' => $action,
             'url' => $launch_url,
             'text' => $text,
+            'add_in_comments_and_post' => $add_in_comments_and_post
         );
     }
 }

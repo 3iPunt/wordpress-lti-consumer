@@ -6,22 +6,11 @@ function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal) {
       ajaxurl,
       {action: 'lti_launch', id: id_lti,  resource_link_id: resource_link_id_val}
     ).done( function(data){
-      console.log(data);
-      
-      
-
-     //1.json decode data array
-
+      //1.json decode data array
       var object = JSON.parse(data);
-     
-      //console.log(object);
-
-      //2.set form parameters
-      
+      //2.set form parameters      
       jQuery.each( object.parameters, function( key, value ) {
         
-        console.log( key + ": " + value );
-
          eval('jQuery("form#launch-' + id+' input[name=' + key + ']").val("'+value+'")' );
 
          if (is_modal) {
