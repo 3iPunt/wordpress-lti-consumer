@@ -28,7 +28,7 @@ function lti_consumer_comment_form($post_id)
     while ( $loop->have_posts() ) : $loop->the_post();
         $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',0);
         if ($add_in_comments_and_post) {
-            echo lti_launch_func(array('id' => get_the_ID(), 'resource_link_id' => get_current_blog_id().'_'.$post_id));
+            echo lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_current_blog_id().'_'.$post_id));
         }    
     endwhile;
 }
@@ -604,6 +604,16 @@ function lti_launch_process($attrs) {
                 'post_status' => 'publish',
                 'posts_per_page' => 1,
             ));
+        }
+
+        elseif ( array_key_exists('internal_id', $attrs) ) {
+            $posts = get_posts(array(
+                'id' => $attrs['id'],
+                'post_type' => 'lti_launch',
+                'post_status' => 'publish',
+                'posts_per_page' => 1,
+            ));
+        }
 
             if ( $posts ) {
                 $lti_content = $posts[0];
