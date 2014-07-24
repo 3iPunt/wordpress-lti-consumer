@@ -606,9 +606,7 @@ function lti_launch_process($attrs) {
                 'post_status' => 'publish',
                 'posts_per_page' => 1,
             ));
-        }
-
-        elseif ( array_key_exists('internal_id', $attrs) ) {
+        } elseif ( array_key_exists('internal_id', $attrs) ) {
             $posts = get_posts(array(
                 'id' => $attrs['id'],
                 'post_type' => 'lti_launch',
@@ -617,21 +615,21 @@ function lti_launch_process($attrs) {
             ));
         }
 
-            if ( $posts ) {
-                $lti_content = $posts[0];
-                $post_id = $lti_content->ID;
-                $consumer_key = get_post_meta($lti_content->ID, '_lti_meta_consumer_key', true);
-                $consumer_secret = get_post_meta($lti_content->ID, '_lti_meta_secret_key', true);
-                $display = get_post_meta($lti_content->ID, '_lti_meta_display', true);
-                $height_modal = get_post_meta($lti_content->ID, '_lti_meta_height_modal', true);
-                $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
-                $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
-                $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
-                $add_in_comments_and_post = get_post_meta($lti_content->ID, '_lti_meta_add_in_comments_and_post', true);
-                $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
-                $text = $lti_content->post_title;
-                $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p1';
-            }
+        if ( $posts ) {
+            $lti_content = $posts[0];
+            $post_id = $lti_content->ID;
+            $consumer_key = get_post_meta($lti_content->ID, '_lti_meta_consumer_key', true);
+            $consumer_secret = get_post_meta($lti_content->ID, '_lti_meta_secret_key', true);
+            $display = get_post_meta($lti_content->ID, '_lti_meta_display', true);
+            $height_modal = get_post_meta($lti_content->ID, '_lti_meta_height_modal', true);
+            $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
+            $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
+            $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
+            $add_in_comments_and_post = get_post_meta($lti_content->ID, '_lti_meta_add_in_comments_and_post', true);
+            $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
+            $text = $lti_content->post_title;
+            $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p1';
+        }
         
 
         // incorporate information from $attrs
