@@ -17,11 +17,10 @@ require('OAuth.php');
  */
 add_action('init', 'create_lti_post_type_func');
 if ( is_user_logged_in() ) {
-    //can't be in content_form because we create a new one and we will have an interference
-    //add_action('comment_form', 'lti_consumer_comment_form');
-    add_action('comment_notes_after', 'lti_consumer_comment_form');
-    
+    add_action('comment_form', 'lti_consumer_comment_form');
 }
+
+var $arrayLTIModal = array();
 
 function lti_consumer_comment_form($post_id) 
 {
@@ -309,8 +308,8 @@ function lti_launch_func($attrs) {
         }else if ( $data['display'] == 'modal' ) {
             wp_enqueue_style( 'bootstrap', 'http://getbootstrap.com/dist/css/bootstrap.min.css' );
 
-            if ($data['is_in_comments']) { //close 
-                $html .= '</form>&nbsp;';
+            if ($data['is_in_comments']) { //then add an space 
+                $html .= '&nbsp;';
             }
             wp_register_script( 'bootstrap', 'http://getbootstrap.com/dist/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
@@ -322,7 +321,7 @@ function lti_launch_func($attrs) {
             }
 
        
-         $html .= '
+         $arrayLTIModal[$id] = '
         <div style="display: none;" class="modal fade bs-example-modal-lg" id="modal'.$id.'"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
               <div class="modal-content">
@@ -330,7 +329,7 @@ function lti_launch_func($attrs) {
                   <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
                   <h4 class="modal-title" id="myLargeModalLabel'.$id.'">'.$data['text'].'</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" id="modal-body-'.$id.'">
                    <form  method="post" action="'.$data['url'].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
                </form> 
                <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
@@ -342,8 +341,9 @@ function lti_launch_func($attrs) {
                   </div>
               </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
-        </div>
-        <script>
+        </div>';
+
+        $html .='<script>
         jQuery(document).ready(function(){
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
                 lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].');
@@ -375,9 +375,9 @@ function lti_launch_func($attrs) {
         } else {
             $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false, '.$data['is_in_comments'].')">Launch ' . $data['text'] . '</button>';
         }
-        $html .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
+        $arrayLTIModal[$id] .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
         foreach ( $data['parameters'] as $key => $value ) {
-            $html .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
+            $arrayLTIModal[$id] .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
         }
 
         if ( $data['display'] != 'modal' )
@@ -385,6 +385,14 @@ function lti_launch_func($attrs) {
     }
 
     return $html;
+}
+
+add_action('wp_footer','show_forms_lti');
+
+function show_forms_lti() {
+    foreach ($arrayLTIModal as $id => $html) {
+        echo $html;
+    }
 }
 
 
