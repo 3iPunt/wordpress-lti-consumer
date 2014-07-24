@@ -608,7 +608,7 @@ function lti_launch_process($attrs) {
             ));
         } elseif ( array_key_exists('internal_id', $attrs) ) {
             $posts = get_posts(array(
-                'id' => $attrs['id'],
+                'id' => $attrs['internal_id'],
                 'post_type' => 'lti_launch',
                 'post_status' => 'publish',
                 'posts_per_page' => 1,
