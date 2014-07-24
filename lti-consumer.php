@@ -17,7 +17,10 @@ require('OAuth.php');
  */
 add_action('init', 'create_lti_post_type_func');
 if ( is_user_logged_in() ) {
-    add_action('comment_form', 'lti_consumer_comment_form');
+    //can't be in content_form because we create a new one and we will have an interference
+    //add_action('comment_form', 'lti_consumer_comment_form');
+    add_action('comment_notes_after', 'lti_consumer_comment_form');
+    
 }
 
 function lti_consumer_comment_form($post_id) 
