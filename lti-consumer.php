@@ -169,8 +169,8 @@ function lti_content_inner_custom_box($lti_content) {
       <th><label for="lti_add_in_comments_and_post"><?php _e( "Add in comments and post", 'lti-consumer' ); ?></label></th>
       <td>
         <select name="lti_add_in_comments_and_post" id="lti_add_in_comments_and_post">
-            <option <?php ($add_in_comments_and_post== '0')?'selected':''; ?> value="0" ><?php echo _e( "No", 'lti-consumer' ); ?></option>
-            <option <?php ($add_in_comments_and_post== '1')?'selected':''; ?> value="1" ><?php echo _e( "Yes", 'lti-consumer' ); ?></option>
+            <option <?php (!$add_in_comments_and_post)?'selected':''; ?> value="0" ><?php echo _e( "No", 'lti-consumer' ); ?></option>
+            <option <?php ($add_in_comments_and_post)?'selected':''; ?> value="1" ><?php echo _e( "Yes", 'lti-consumer' ); ?></option>
         </select>
       </td>
     </tr>
