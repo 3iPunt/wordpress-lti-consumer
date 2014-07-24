@@ -623,17 +623,12 @@ function lti_launch_process($attrs) {
                 'posts_per_page' => 1,
             ));
         } elseif ( array_key_exists('internal_id', $attrs) ) {
-            $posts = get_posts(array(
-                'id' => $attrs['internal_id'],
-                'post_type' => 'lti_launch',
-                'post_status' => 'publish',
-                'posts_per_page' => 1,
-            ));
+            $posts = get_post($attrs['internal_id']);
             $is_in_comments = true;
         }
 
         if ( $posts ) {
-            $lti_content = $posts[0];
+            $lti_content = is_array($posts)?$posts[0]:$posts;
             $post_id = $lti_content->ID;
             $consumer_key = get_post_meta($lti_content->ID, '_lti_meta_consumer_key', true);
             $consumer_secret = get_post_meta($lti_content->ID, '_lti_meta_secret_key', true);
