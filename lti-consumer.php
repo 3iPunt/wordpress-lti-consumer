@@ -29,7 +29,7 @@ function lti_consumer_comment_form($post_id)
     $args = array( 'post_type' => 'lti_launch');
     $loop = new WP_Query( $args );
     while ( $loop->have_posts() ) : $loop->the_post();
-        $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',0);
+        $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',true);
         if ($add_in_comments_and_post) {
             echo lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
         }    
@@ -107,7 +107,7 @@ function lti_content_inner_custom_box($lti_content) {
     $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
     $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
     $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
-    $add_in_comments_and_post = get_post_meta($lti_content->ID,'_lti_meta_add_in_comments_and_post',0);
+    $add_in_comments_and_post = get_post_meta($lti_content->ID,'_lti_meta_add_in_comments_and_post',true);
     $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
     $version= get_post_meta($lti_content->ID, '_lti_meta_version', true);
 
@@ -169,8 +169,8 @@ function lti_content_inner_custom_box($lti_content) {
       <th><label for="lti_add_in_comments_and_post"><?php _e( "Add in comments and post", 'lti-consumer' ); ?></label></th>
       <td>
         <select name="lti_add_in_comments_and_post" id="lti_add_in_comments_and_post">
-            <option <?php (!$add_in_comments_and_post)?'selected':''; ?> value="0" ><?php echo _e( "No", 'lti-consumer' ); ?></option>
-            <option <?php ($add_in_comments_and_post)?'selected':''; ?> value="1" ><?php echo _e( "Yes", 'lti-consumer' ); ?></option>
+            <option <?php echo ($add_in_comments_and_post)?'selected':''; ?> value="0" ><?php echo _e( "No", 'lti-consumer' ); ?></option>
+            <option <?php echo ($add_in_comments_and_post)?'selected':''; ?> value="1" ><?php echo _e( "Yes", 'lti-consumer' ); ?></option>
         </select>
       </td>
     </tr>
