@@ -629,6 +629,8 @@ function lti_launch_process($attrs) {
             $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
             $text = $lti_content->post_title;
             $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p1';
+        } else {
+            return array('error' => 'Lti tool not found.');
         }
         
 
