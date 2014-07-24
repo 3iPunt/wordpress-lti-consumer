@@ -1,10 +1,9 @@
-function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_comments) {
+function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_comments, internal_id) {
   var form = jQuery('form#launch-' + id);
 
-  if ( form.data('post') !== '' ) {
     jQuery.post(
       ajaxurl,
-      {action: 'lti_launch', id: id_lti,  resource_link_id: resource_link_id_val, internal_id: id, is_in_comments: is_in_comments}
+      {action: 'lti_launch', id: id_lti,  resource_link_id: resource_link_id_val, internal_id: internal_id, is_in_comments: is_in_comments}
     ).done( function(data){
       //1.json decode data array
       var object = JSON.parse(data);
@@ -15,8 +14,7 @@ function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_c
 
          if (is_modal) {
            eval('jQuery("form#launch-modal-' + id+'").append(jQuery("form#launch-' + id+' input[name=' + key + ']"));' );
-         } 
-        
+         }
 
       });
       if (is_modal) {
@@ -26,7 +24,6 @@ function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_c
       }
 
     });
-  }
 
   
 }

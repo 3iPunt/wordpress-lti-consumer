@@ -24,6 +24,7 @@ $arrayLTIModal = array();
 
 function lti_consumer_comment_form($post_id) 
 {
+    $_SESSION['arrayLTIModal'] = $arrayLTIModal;
     //1. check if there are any 
     $args = array( 'post_type' => 'lti_launch');
     $loop = new WP_Query( $args );
@@ -316,12 +317,15 @@ function lti_launch_func($attrs) {
             if ( $data['action'] == 'link' ) {
                  $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'">Launch ' . $data['text'] . '</a>';
             } else {
-                $html .= '<button class="btn btn-primary" data-toggle="modal" data-target="#modal'.$id.'">
+                $html .= '<button class="btn btn-primary" id="button-modal-'.$id.'" data-toggle="modal" data-target="#modal'.$id.'">
     Launch ' . $data['text'] . '</button>';
             }
 
-       
-         $arrayLTIModal[$id] = '
+        $arrayLTIModal = $_SESSION['arrayLTIModal'];
+        if (!$arrayLTIModal) {
+            $arrayLTIModal = array();
+        }
+        $arrayLTIModal[$id] = '
         <div style="display: none;" class="modal fade bs-example-modal-lg" id="modal'.$id.'"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
               <div class="modal-content">
@@ -330,10 +334,10 @@ function lti_launch_func($attrs) {
                   <h4 class="modal-title" id="myLargeModalLabel'.$id.'">'.$data['text'].'</h4>
                 </div>
                 <div class="modal-body" id="modal-body-'.$id.'">
-                   <form  method="post" action="'.$data['url'].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
-               </form> 
-               <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="frame-' . $iframeId . '"></iframe>
-               
+                   <form  method="post" action="'.$data['url'].'" target="iframe-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'">
+                   </form> 
+                   <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="iframe-' . $iframeId . '"></iframe>
+                   
                 </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -341,47 +345,44 @@ function lti_launch_func($attrs) {
                   </div>
               </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
-        </div>';
-
-        $html .='<script>
+        </div>
+        <script>
         jQuery(document).ready(function(){
+            jQuery("#button-modal-'.$id.'").click(function( event ) {
+                event.preventDefault();
+            });
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
-                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].');
-                   
-                   /*jQuery(this).find(".modal-dialog").css({
-                              width:"30%", 
-                              height:"100%", 
-                              "padding":"0"
-                    });
-                    jQuery(this).find(".modal-content").css({
-                              height:"100%", 
-                              "border-radius":"0",
-                              "padding":"0"
-                    });
-                    jQuery(this).find(".modal-body").css({
-                              width:"auto",
-                              height:"100%", 
-                              "padding":"0"
-                    });*/
-
+                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
             });
          });
-        </script>
-
-        ';
+        </script>';
            
         }else if ( $data['action'] == 'link' ) {
-            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false, '.$data['is_in_comments'].')">Launch ' . $data['text'] . '</a>';
+            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false, '.$data['is_in_comments'].', '.$data['id'].')">Launch ' . $data['text'] . '</a>';
         } else {
-            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false, '.$data['is_in_comments'].')">Launch ' . $data['text'] . '</button>';
+            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false, '.$data['is_in_comments'].', '.$data['id'].')">Launch ' . $data['text'] . '</button>';
         }
-        $arrayLTIModal[$id] .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
-        foreach ( $data['parameters'] as $key => $value ) {
-            $arrayLTIModal[$id] .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
-        }
+        if ($data['display']=='modal') {
+            $arrayLTIModal[$id] .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
+            foreach ( $data['parameters'] as $key => $value ) {
+                $arrayLTIModal[$id] .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
+            }
 
-        if ( $data['display'] != 'modal' )
+            $arrayLTIModal[$id] .= '</form>';
+            $_SESSION['arrayLTIModal'] = $arrayLTIModal;
+        }
+        else {
+            $html .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
+            foreach ( $data['parameters'] as $key => $value ) {
+                $html .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
+            }
+
             $html .= '</form>';
+
+        }
+        
+
+        
     }
 
     return $html;
@@ -390,8 +391,13 @@ function lti_launch_func($attrs) {
 add_action('wp_footer','show_forms_lti');
 
 function show_forms_lti() {
-    foreach ($arrayLTIModal as $id => $html) {
-        echo $html;
+
+    if (isset($_SESSION['arrayLTIModal'])) {
+        $arrayLTIModal = $_SESSION['arrayLTIModal'];
+        foreach ($arrayLTIModal as $id => $html) {
+            echo $html;
+        }
+        unset($_SESSION['arrayLTIModal']);
     }
 }
 
