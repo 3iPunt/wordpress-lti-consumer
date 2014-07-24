@@ -16,6 +16,21 @@ require('OAuth.php');
  * Create the lti_launch custom post type.
  */
 add_action('init', 'create_lti_post_type_func');
+add_action('comment_form', 'lti_consumer_comment_form');
+
+function lti_consumer_comment_form($post_id) 
+{
+    //1. check if there are any 
+    $args = array( 'post_type' => 'lti_launch');
+    $loop = new WP_Query( $args );
+    while ( $loop->have_posts() ) : $loop->the_post();
+        $add_in_comments_and_post = get_post_meta(the_ID(),'_lti_meta_add_in_comments_and_post',0);
+        if ($add_in_comments_and_post) {
+            echo lti_launch_func(array('id' => the_ID()));
+        }    
+    endwhile;
+}
+
 function create_lti_post_type_func() {
     register_post_type(
         'lti_launch',
@@ -87,6 +102,7 @@ function lti_content_inner_custom_box($lti_content) {
     $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
     $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
     $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
+    $add_in_comments_and_post = get_post_meta($lti_content->ID,'_lti_meta_add_in_comments_and_post',0);
     $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
     $version= get_post_meta($lti_content->ID, '_lti_meta_version', true);
 
@@ -141,6 +157,16 @@ function lti_content_inner_custom_box($lti_content) {
       <td>
         <label>Button <input type="radio" <?php checked($action, 'button'); ?> id="lti_content_field_action_button" name="lti_content_field_action" value="button" /></label><br>
         <label>Link <input type="radio" <?php checked($action, 'link'); ?> id="lti_content_field_action_link" name="lti_content_field_action" value="link"  /></label>
+      </td>
+    </tr>
+
+    <tr>
+      <th><label for="lti_add_in_comments_and_post"><?php _e( "Add in comments and post", 'lti-consumer' ); ?></label></th>
+      <td>
+        <select name="lti_add_in_comments_and_post" id="lti_add_in_comments_and_post">
+            <option <?php ($add_in_comments_and_post== '0')?'selected':''; ?> value="0" ><?php echo _e( "No", 'lti-consumer' ); ?></option>
+            <option <?php ($add_in_comments_and_post== '1')?'selected':''; ?> value="1" ><?php echo _e( "Yes", 'lti-consumer' ); ?></option>
+        </select>
       </td>
     </tr>
 
@@ -219,6 +245,8 @@ function lti_content_save_post($post_id) {
     $action = sanitize_text_field($_POST['lti_content_field_action']);
     $launch_url = sanitize_text_field($_POST['lti_content_field_launch_url']);
     $configuration_url = sanitize_text_field($_POST['lti_content_field_configuration_url']);
+    $lti_add_in_comments_and_post = sanitize_text_field($_POST['lti_add_in_comments_and_post']);
+    
     $return_url = sanitize_text_field($_POST['lti_content_field_return_url']);
     $version = sanitize_text_field($_POST['lti_content_field_version']);
 
@@ -230,6 +258,7 @@ function lti_content_save_post($post_id) {
     update_post_meta($post_id, '_lti_meta_action', $action);
     update_post_meta($post_id, '_lti_meta_launch_url', $launch_url);
     update_post_meta($post_id, '_lti_meta_configuration_url', $configuration_url);
+    update_post_meta($post_id, '_lti_meta_add_in_comments_and_post', $lti_add_in_comments_and_post);
     update_post_meta($post_id, '_lti_meta_return_url', $return_url);
     update_post_meta($post_id, '_lti_meta_version', $version);
 }
@@ -584,6 +613,7 @@ function lti_launch_process($attrs) {
                 $action = get_post_meta($lti_content->ID, '_lti_meta_action', true);
                 $launch_url = get_post_meta($lti_content->ID, '_lti_meta_launch_url', true);
                 $configuration_url = get_post_meta($lti_content->ID, '_lti_meta_configuration_url', true);
+                $add_in_comments_and_post = get_post_meta($lti_content->ID, '_lti_meta_add_in_comments_and_post', true);
                 $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
                 $text = $lti_content->post_title;
                 $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p1';
