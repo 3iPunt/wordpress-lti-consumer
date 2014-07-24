@@ -330,7 +330,7 @@ function lti_launch_func($attrs) {
               <div class="modal-content">
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                  <h4 class="modal-title" id="myLargeModalLabel">Large modal</h4>
+                  <h4 class="modal-title" id="myLargeModalLabel">'.$data['text'].'</h4>
                 </div>
                 <div class="modal-body">
                    <form  method="post" action="'.$data['url'].'" target="frame-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data[id].'">
