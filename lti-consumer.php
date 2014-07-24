@@ -597,6 +597,8 @@ function lti_launch_process($attrs) {
         $post_id = '';
         $text = '';
 
+        $posts = false;
+
         if ( array_key_exists('id', $attrs) ) {
             $posts = get_posts(array(
                 'name' => $attrs['id'],
@@ -630,7 +632,7 @@ function lti_launch_process($attrs) {
                 $text = $lti_content->post_title;
                 $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p1';
             }
-        }
+        
 
         // incorporate information from $attrs
         if ( array_key_exists('resource_link_id', $attrs) ) {
