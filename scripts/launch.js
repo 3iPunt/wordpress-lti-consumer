@@ -46,26 +46,8 @@ eventer(messageEvent,function(e) {
     if ($(current_modal_open)) {
       $(current_modal_open).modal('hide');
     }
-    var jqComments = jQuery("#comment,[name=comment]");
-    var jqSubmitButton = jQuery("#submit,[name=submit]");
-    var widgetHtml = '[wowza-widget embed_id="'+e.data.embed_id+'" profile="comments" /]';
-    
-    if (jqComments.size() > 0 && jqSubmitButton.size() > 0)
-    {
-      // get only the first submit button that was found
-      jqSubmitButton = jQuery(jqSubmitButton[0]);
-      
-      var html = jqComments.val();
-      if (html.replace(" ", "") != "") {
-        html += "\n";
-      }
-      
-      html += widgetHtml;
-      jqComments.val(html);
-      jqComments.attr('readonly', true);
-      jqSubmitButton.click();
-      jqSubmitButton.val("Please wait...");
-      jqSubmitButton.attr("disabled", true);
+    if (typeof('setWowzaEmbedId') == "function") {
+      setWowzaEmbedId(e.data.embed_id);
     }
   }
 },false);
