@@ -24,6 +24,7 @@ $arrayLTIModal = array();
 
 function lti_consumer_comment_form($post_id) 
 {
+    $original_post_id = get_the_ID();
     $_SESSION['arrayLTIModal'] = $arrayLTIModal;
     //1. check if there are any 
     $args = array( 'post_type' => 'lti_launch');
@@ -34,6 +35,8 @@ function lti_consumer_comment_form($post_id)
             echo lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
         }    
     endwhile;
+    //restore original post
+    get_post($original_post_id);
 }
 
 function create_lti_post_type_func() {
