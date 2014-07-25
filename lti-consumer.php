@@ -36,7 +36,7 @@ function lti_consumer_comment_form($post_id)
         }    
     endwhile;
     //restore original post
-    get_post($original_post_id);
+    setup_postdata(get_post($original_post_id));
 }
 
 function create_lti_post_type_func() {
