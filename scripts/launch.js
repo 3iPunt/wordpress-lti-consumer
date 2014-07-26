@@ -15,7 +15,13 @@ function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_c
          eval('jQuery("form#launch-' + id+' input[name=' + key + ']").val("'+value+'")' );
 
          if (is_modal) {
-           eval('jQuery("form#launch-modal-' + id+'").append(jQuery("form#launch-' + id+' input[name=' + key + ']"));' );
+            if (eval('jQuery("form#launch-modal-' + id+' input[name=' + key + ']")').length>0) {
+              //update it
+              eval('jQuery("form#launch-modal-' + id+' input[name=' + key + ']").val("'+value+'")' );
+            } else {
+              //appedn it
+             eval('jQuery("form#launch-modal-' + id+'").append(jQuery("form#launch-' + id+' input[name=' + key + ']"));' );
+            }
          }
 
       });
