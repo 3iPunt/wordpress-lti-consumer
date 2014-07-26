@@ -16,9 +16,6 @@ require('OAuth.php');
  * Create the lti_launch custom post type.
  */
 add_action('init', 'create_lti_post_type_func');
-if ( is_user_logged_in() ) {
-    add_action('comment_form', 'lti_consumer_comment_form');
-}
 
 $arrayLTIModal = array();
 
@@ -40,6 +37,10 @@ function lti_consumer_comment_form($post_id)
 }
 
 function create_lti_post_type_func() {
+    if ( is_user_logged_in() ) {
+        add_action('comment_form', 'lti_consumer_comment_form');
+    }
+
     register_post_type(
         'lti_launch',
         array(
@@ -138,7 +139,8 @@ function lti_content_inner_custom_box($lti_content) {
         <label>Open in a new browser window <input type="radio" <?php checked($display, 'newwindow'); ?> id="lti_content_field_display_newwindow" name="lti_content_field_display" value="newwindow" /></label><br>
         <label>Inline in an iframe <input type="radio" <?php checked($display, 'iframe'); ?> id="lti_content_field_display_iframe" name="lti_content_field_display" value="iframe" /></label><br>
         <label>Open in the current browser window <input type="radio" <?php checked($display, 'self'); ?> id="lti_content_field_display_self" name="lti_content_field_display" value="self" /></label><br>
-        <label>Open in modal <input type="radio" <?php checked($display, 'modal'); ?> id="lti_content_field_display_modal" name="lti_content_field_display" value="modal" /></label>
+        <label>Open in modal <input type="radio" <?php checked($display, 'modal'); ?> id="lti_content_field_display_modal" name="lti_content_field_display" value="modal" /></label><br>
+        <label>Open in Bootstrap modal <input type="radio" <?php checked($display, 'modal_bootstrap'); ?> id="lti_content_field_display_modal_bootstrap" name="lti_content_field_display" value="modal_bootstrap" /></label>
         <div id="show-me-textbox">Modal height: <input type="text" id="lti_content_field_height_modal" name="lti_content_field_height_modal" size="7" value="<?php echo esc_attr($height_modal);?>"> em</div><br>
         <script>
 
@@ -149,7 +151,7 @@ function lti_content_inner_custom_box($lti_content) {
                 showModalHeight();
              });
              function showModalHeight(){
-                 if (jQuery('#lti_content_field_display_modal').prop('checked')) {
+                 if (jQuery('#lti_content_field_display_modal').prop('checked') || jQuery('#lti_content_field_display_modal_bootstrap').prop('checked')) {
                         jQuery('#show-me-textbox').show();
                     } else {
                         jQuery('#show-me-textbox').hide();
@@ -310,6 +312,58 @@ function lti_launch_func($attrs) {
             }
 
         }else if ( $data['display'] == 'modal' ) {
+
+            if ($data['is_in_comments']) { //then add an space 
+                $html .= '&nbsp;';
+            }
+            wp_enqueue_style( 'jquery_modal_css', plugins_url('css/jquery_modal.css', __FILE__) );
+            wp_enqueue_script('lti_launch_modal_jquery', plugins_url('scripts/jquery.simplemodal.1.4.4.min.js', __FILE__), array('jquery'));
+            wp_enqueue_script('lti_launch_modal_jquery'); 
+            if ( $data['action'] == 'link' ) {
+                 $html .= '<a href="#"  id="button-modal-'.$id.'">Launch ' . $data['text'] . '</a>';
+            } else {
+                $html .= '<button class="btn btn-primary" id="button-modal-'.$id.'">
+    Launch ' . $data['text'] . '</button>';
+            }
+
+            $arrayLTIModal = $_SESSION['arrayLTIModal'];
+            if (!$arrayLTIModal) {
+                $arrayLTIModal = array();
+            }
+            $arrayLTIModal[$id] = '
+            <div id="modal-content-'.$id.'" class="jquery-modal">
+                <form  method="post" action="'.$data['url'].'" target="iframe-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'">
+                </form> 
+                <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="iframe-' . $iframeId . '" id="iframe-modal-'.$id.'"></iframe>
+            </div>
+            <div style="display:none">
+                <img src="'.plugins_url('img/x.png', __FILE__).'"/>
+            </div>
+            <script>
+            jQuery(document).ready(function(){
+                jQuery("#button-modal-'.$id.'").click(function( event ) {
+                    event.preventDefault();
+                    jQuery("#modal-content-'.$id.'").modal(
+                        {
+                            escClose: true,
+                            opacity: 80,
+                            minHeight:400,
+                            minWidth: 600,
+                            onShow: function (dialog) {
+                                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
+                            },
+                            onClose: function (dialog) {
+
+                                jQuery("#iframe-modal-'.$id.'").attr("src","about:blank");
+                                jQuery.modal.close();
+                            }
+                        });
+                });
+             });
+            </script>';
+
+        }else if ( $data['display'] == 'modal_bootstrap' ) {
+
             wp_enqueue_style( 'bootstrap', 'http://getbootstrap.com/dist/css/bootstrap.min.css' );
 
             if ($data['is_in_comments']) { //then add an space 
@@ -324,47 +378,47 @@ function lti_launch_func($attrs) {
     Launch ' . $data['text'] . '</button>';
             }
 
-        $arrayLTIModal = $_SESSION['arrayLTIModal'];
-        if (!$arrayLTIModal) {
-            $arrayLTIModal = array();
-        }
-        $arrayLTIModal[$id] = '
-        <div style="display: none;" class="modal fade bs-example-modal-lg" id="modal'.$id.'"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                  <h4 class="modal-title" id="myLargeModalLabel'.$id.'">'.$data['text'].'</h4>
-                </div>
-                <div class="modal-body" id="modal-body-'.$id.'">
-                   <form  method="post" action="'.$data['url'].'" target="iframe-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'">
-                   </form> 
-                   <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="iframe-' . $iframeId . '" id="iframe-modal-'.$id.'"></iframe>
-                   
-                </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <!--button type="button" class="btn btn-primary">Save changes</button-->
-                  </div>
-              </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div>
-        <script>
-        jQuery(document).ready(function(){
-            jQuery("#button-modal-'.$id.'").click(function( event ) {
-                event.preventDefault();
-            });
-            jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
-                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
-            });
-            jQuery( "#modal'.$id.'" ).on("hidden.bs.modal", function(){
-                jQuery("#iframe-modal-'.$id.'").attr("src","about:blank");
-            });
+            $arrayLTIModal = $_SESSION['arrayLTIModal'];
+            if (!$arrayLTIModal) {
+                $arrayLTIModal = array();
+            }
+            $arrayLTIModal[$id] = '
+            <div style="display: none;" class="modal fade bs-example-modal-lg" id="modal'.$id.'"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                      <h4 class="modal-title" id="myLargeModalLabel'.$id.'">'.$data['text'].'</h4>
+                    </div>
+                    <div class="modal-body" id="modal-body-'.$id.'">
+                       <form  method="post" action="'.$data['url'].'" target="iframe-' . $iframeId . '" id="launch-modal-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'">
+                       </form> 
+                       <iframe style="width: 100%; height: '.$data["heightModal"].'em'.';" class="launch-frame" name="iframe-' . $iframeId . '" id="iframe-modal-'.$id.'"></iframe>
+                       
+                    </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <!--button type="button" class="btn btn-primary">Save changes</button-->
+                      </div>
+                  </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div>
+            <script>
+            jQuery(document).ready(function(){
+                jQuery("#button-modal-'.$id.'").click(function( event ) {
+                    event.preventDefault();
+                });
+                jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
+                    lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
+                });
+                jQuery( "#modal'.$id.'" ).on("hidden.bs.modal", function(){
+                    jQuery("#iframe-modal-'.$id.'").attr("src","about:blank");
+                });
 
-    
-         });
-        </script>';
-           
+        
+             });
+            </script>';
+               
         }else if ( $data['action'] == 'link' ) {
             $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false, '.$data['is_in_comments'].', '.$data['id'].')">Launch ' . $data['text'] . '</a>';
         } else {
