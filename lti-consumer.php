@@ -357,6 +357,11 @@ function lti_launch_func($attrs) {
             jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
                 lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
             });
+            jQuery( "#modal'.$id.'" ).on("hidden.bs.modal", function(){
+                jQuery("#iframe-modal-'.$id.'").attr("src","about:blank");
+            });
+
+    
          });
         </script>';
            

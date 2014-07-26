@@ -2,7 +2,6 @@ var current_modal_open = false;
 function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_comments, internal_id) {
   var form = jQuery('form#launch-' + id);
     current_modal_open = "#modal"+id;
-    jQuery("#iframe-modal-"+id).attr('src','about:blank');
     jQuery("#iframe-modal-"+id).contents().find('html').html("<link rel='stylesheet' href='http://getbootstrap.com/dist/css/bootstrap.min.css' type='text/css' media='screen'><link rel='stylesheet' href='http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css' type='text/css' media='screen'>  <br><br><div class=\"col-xs-5 col-centered\"><div class=\"item\"><div class=\"content\"></div></div></div><div class='col-xs-2 col-centered'><div class='item'><div class='content'><h1><i class='icon-spinner icon-spin icon-large glyphicon-align-center'></i></h1></div></div></div><div class=\"col-xs-5 col-centered\"><div class=\"item\"><div class=\"content\"></div></div></div>");
     jQuery.post(
       ajaxurl,
