@@ -339,6 +339,7 @@ function lti_launch_func($attrs) {
                 <img src="'.plugins_url('img/x.png', __FILE__).'"/>
             </div>
             <script>
+                var modalType'.$id.' = "jquery";
             jQuery(document).ready(function(){
                 jQuery("#button-modal-'.$id.'").click(function( event ) {
                     event.preventDefault();
@@ -404,6 +405,7 @@ function lti_launch_func($attrs) {
             </div>
             <script>
             jQuery(document).ready(function(){
+                var modalType'.$id.' = "bootstrap";
                 jQuery("#button-modal-'.$id.'").click(function( event ) {
                     event.preventDefault();
                 });
