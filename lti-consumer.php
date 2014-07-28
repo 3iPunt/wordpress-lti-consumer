@@ -21,7 +21,6 @@ $arrayLTIModal = array();
 
 function lti_consumer_comment_form($post_id) 
 {
-    $original_post_id = get_the_ID();
     $_SESSION['arrayLTIModal'] = $arrayLTIModal;
     //1. check if there are any 
     $args = array( 'post_type' => 'lti_launch');
@@ -33,7 +32,7 @@ function lti_consumer_comment_form($post_id)
         }    
     endwhile;
     //restore original post
-    setup_postdata(get_post($original_post_id));
+    wp_reset_postdata();
 }
 
 function create_lti_post_type_func() {
