@@ -322,8 +322,7 @@ function lti_launch_func($attrs) {
             if ( $data['action'] == 'link' ) {
                  $html .= '<a href="#"  id="button-modal-'.$id.'">Launch ' . $data['text'] . '</a>';
             } else {
-                $html .= '<button class="btn btn-primary" id="button-modal-'.$id.'">
-    Launch ' . $data['text'] . '</button>';
+                $html .= '<input type="button" id="button-modal-'.$id.'" value="Launch ' . $data['text'] . '">';
             }
 
             $arrayLTIModal = $_SESSION['arrayLTIModal'];
