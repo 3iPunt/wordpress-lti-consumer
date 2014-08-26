@@ -25,19 +25,53 @@ function lti_consumer_comment_form($post_id)
     //1. check if there are any 
     $args = array( 'post_type' => 'lti_launch');
     $loop = new WP_Query( $args );
-    while ( $loop->have_posts() ) : $loop->the_post();
-        $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',true);
-        if ($add_in_comments_and_post) {
-            echo lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
+    while ( $loop->have_posts() ) : $loop->the_post(); 
+       
+        if( get_post_status( get_the_ID()) =='publish' ){
+            $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',true);
+            if ($add_in_comments_and_post) {
+                echo lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
+            }
         }    
     endwhile;
     //restore original post
     wp_reset_postdata();
 }
 
+function lti_consumer_post_form($content) 
+{
+    $post_id = get_the_ID();
+
+    $_SESSION['arrayLTIModal'] = $arrayLTIModal;
+    //1. check if there are any 
+    $args = array( 'post_type' => 'lti_launch');
+    $loop = new WP_Query( $args );
+    while ( $loop->have_posts() ) : $loop->the_post(); 
+       
+        if( get_post_status( get_the_ID()) =='publish' ){
+            $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',true);
+            if ($add_in_comments_and_post) {
+                $content.= lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
+            }
+        }    
+    endwhile;
+    //restore original post
+    wp_reset_postdata();
+    return $content;
+}
+
 function create_lti_post_type_func() {
     if ( is_user_logged_in() ) {
+        wp_enqueue_style( 'lti_consumer_css', plugins_url('css/lti-consumer.css', __FILE__) );
+            
+
+        add_filter("media_buttons_context", "lti_consumer_post_form");
         add_action('comment_form', 'lti_consumer_comment_form');
+        add_action('wp_footer','show_forms_lti');
+        add_action('admin_footer','show_forms_lti');
+        add_action('wp_head', 'lti_launch_ajaxurl');
+        add_action('admin_head', 'lti_launch_ajaxurl');
+
     }
 
     register_post_type(
@@ -319,9 +353,9 @@ function lti_launch_func($attrs) {
             wp_enqueue_script('lti_launch_modal_jquery', plugins_url('scripts/jquery.simplemodal.1.4.4.min.js', __FILE__), array('jquery'));
             wp_enqueue_script('lti_launch_modal_jquery'); 
             if ( $data['action'] == 'link' ) {
-                 $html .= '<a href="#"  id="button-modal-'.$id.'">Launch ' . $data['text'] . '</a>';
+                 $html .= '<a href="#"  class="button-lti-consumer" id="button-modal-'.$id.'">' . $data['text'] . '</a>';
             } else {
-                $html .= '<input type="button" id="button-modal-'.$id.'" value="Launch ' . $data['text'] . '">';
+                $html .= '<input type="button" class="button-lti-consumer" id="button-modal-'.$id.'" value="' . $data['text'] . '">';
             }
 
             $arrayLTIModal = $_SESSION['arrayLTIModal'];
@@ -371,10 +405,10 @@ function lti_launch_func($attrs) {
             wp_register_script( 'bootstrap', 'http://getbootstrap.com/dist/js/bootstrap.min.js', array('jquery'), 3.3, true); 
             wp_enqueue_script('bootstrap'); 
             if ( $data['action'] == 'link' ) {
-                 $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'">Launch ' . $data['text'] . '</a>';
+                 $html .= '<a href="#"  data-toggle="modal" data-target="#modal'.$id.'">' . $data['text'] . '</a>';
             } else {
-                $html .= '<button class="btn btn-primary" id="button-modal-'.$id.'" data-toggle="modal" data-target="#modal'.$id.'">
-    Launch ' . $data['text'] . '</button>';
+                $html .= '<button class="btn btn-primary" class="button-lti-consumer"  id="button-modal-'.$id.'" data-toggle="modal" data-target="#modal'.$id.'">
+    ' . $data['text'] . '</button>';
             }
 
             $arrayLTIModal = $_SESSION['arrayLTIModal'];
@@ -450,10 +484,9 @@ function lti_launch_func($attrs) {
     return $html;
 }
 
-add_action('wp_footer','show_forms_lti');
 
 function show_forms_lti() {
-
+echo "**ENTRA";
     if (isset($_SESSION['arrayLTIModal'])) {
         $arrayLTIModal = $_SESSION['arrayLTIModal'];
         foreach ($arrayLTIModal as $id => $html) {
@@ -463,8 +496,6 @@ function show_forms_lti() {
     }
 }
 
-
-add_action('wp_head', 'lti_launch_ajaxurl');
 function lti_launch_ajaxurl() {
 ?>
 <script type="text/javascript">
