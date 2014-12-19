@@ -3,8 +3,8 @@
  * Plugin Name: LTI-compatible consumer
  * Plugin URI: 
  * Description: An LTI-compatible launching plugin for Wordpress.
- * Version: 0.2.16
- * Author: John Weaver <john.weaver@saltbox.com>
+ * Version: 0.3.16
+ * Author: Antoni Bertran based on code John Weaver <john.weaver@saltbox.com>
  * License: GPLv3
  */
 
@@ -25,14 +25,24 @@ function lti_consumer_comment_form($post_id)
     //1. check if there are any 
     $args = array( 'post_type' => 'lti_launch');
     $loop = new WP_Query( $args );
-    while ( $loop->have_posts() ) : $loop->the_post(); 
-       
-        if( get_post_status( get_the_ID()) =='publish' ){
-            $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',true);
+    //while ( $loop->have_posts() ) : $loop->the_post(); 
+    $i = 0;
+    while ( $i<$loop->post_count ) : 
+        $curent_post = $loop->posts[$i];
+        if( $curent_post->post_status =='publish' ){
+            $add_in_comments_and_post = get_post_meta($curent_post->ID,'_lti_meta_add_in_comments_and_post',true);
             if ($add_in_comments_and_post) {
-                echo lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
+                $resource_link_id = get_current_blog_id().'_'.$curent_post->ID.'_'.$post_id;
+                //abertranb to get the resource_link_id 
+                $lti_options = get_option( 'lti_options' );
+                if (isset($lti_options['lti_resource_link_id'])) {
+                    $resource_link_id = $lti_options['lti_resource_link_id'];
+                }
+                //end
+                echo lti_launch_func(array('internal_id' => $curent_post->ID, 'resource_link_id' => $resource_link_id));
             }
         }    
+        $i++;
     endwhile;
     //restore original post
     wp_reset_postdata();
@@ -41,22 +51,35 @@ function lti_consumer_comment_form($post_id)
 function lti_consumer_post_form($content) 
 {
     $post_id = get_the_ID();
+    if (get_post_type($post_id)!= 'lti_launch' ) {
 
-    $_SESSION['arrayLTIModal'] = $arrayLTIModal;
-    //1. check if there are any 
-    $args = array( 'post_type' => 'lti_launch');
-    $loop = new WP_Query( $args );
-    while ( $loop->have_posts() ) : $loop->the_post(); 
-       
-        if( get_post_status( get_the_ID()) =='publish' ){
-            $add_in_comments_and_post = get_post_meta(get_the_ID(),'_lti_meta_add_in_comments_and_post',true);
-            if ($add_in_comments_and_post) {
-                $content.= lti_launch_func(array('internal_id' => get_the_ID(), 'resource_link_id' => get_the_ID().'_'.get_current_blog_id().'_'.$post_id));
-            }
-        }    
-    endwhile;
-    //restore original post
-    wp_reset_postdata();
+        $_SESSION['arrayLTIModal'] = $arrayLTIModal;
+        //1. check if there are any 
+        $args = array( 'post_type' => 'lti_launch');
+        $loop = new WP_Query( $args );
+        //while ( $loop->have_posts() ) : $loop->the_post(); 
+        $i = 0;
+        while ( $i<$loop->post_count ) : 
+            $curent_post = $loop->posts[$i];
+            if( $curent_post->post_status =='publish' ){
+                $add_in_comments_and_post = get_post_meta($curent_post->ID,'_lti_meta_add_in_comments_and_post',true);
+                if ($add_in_comments_and_post) {
+                    $resource_link_id = get_current_blog_id().'_'.$curent_post->ID.'_'.$post_id;
+                    //abertranb to get the resource_link_id 
+                    $lti_options = get_option( 'lti_options' );
+                    if (isset($lti_options['lti_resource_link_id'])) {
+                        $resource_link_id = $lti_options['lti_resource_link_id'];
+                    }
+                    //end
+                    $content.= lti_launch_func(array('internal_id' => $curent_post->ID, 'resource_link_id' => $resource_link_id));
+                }
+            }    
+            $i++;
+           
+        endwhile;
+        //restore original post
+        wp_reset_postdata();
+    }
     return $content;
 }
 
@@ -90,8 +113,10 @@ function create_lti_post_type_func() {
             ),
             'description' => __('An LTI-compatible tool for content launch'),
             'publicly_queryable' => true,
-            'public' => true,
+            'public' => false, //hide from menu
+            'exclude_from_search' => true,
             'has_archive' => true,
+            'show_ui' => false, //hide from menu
             'supports' => array(
                 'title',
                 'editor',
@@ -380,10 +405,10 @@ function lti_launch_func($attrs) {
                         {
                             escClose: true,
                             opacity: 80,
-                            minHeight:400,
-                            minWidth: 600,
+                            minHeight:jQuery( document ).height()<400?(jQuery( document ).height()*0.80):400,
+                            minWidth: jQuery( document ).width()<700?(jQuery( document ).width()*0.80):600,
                             onShow: function (dialog) {
-                                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
+                                lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.($data['is_in_comments']?'true':'false').', '.$data['id'].');
                             },
                             onClose: function (dialog) {
 
@@ -443,7 +468,7 @@ function lti_launch_func($attrs) {
                     event.preventDefault();
                 });
                 jQuery( "#modal'.$id.'" ).on("shown.bs.modal", function(){
-                    lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.$data['is_in_comments'].', '.$data['id'].');
+                    lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , true, '.($data['is_in_comments']?'true':'false').', '.$data['id'].');
                 });
                 jQuery( "#modal'.$id.'" ).on("hidden.bs.modal", function(){
                     jQuery("#iframe-modal-'.$id.'").attr("src","about:blank");
@@ -454,11 +479,11 @@ function lti_launch_func($attrs) {
             </script>';
                
         }else if ( $data['action'] == 'link' ) {
-            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false, '.$data['is_in_comments'].', '.$data['id'].')">Launch ' . $data['text'] . '</a>';
+            $html .= '<a href="#" onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\' , false, '.($data['is_in_comments']?'true':'false').', '.$data['id'].')">Launch ' . $data['text'] . '</a>';
         } else {
-            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false, '.$data['is_in_comments'].', '.$data['id'].')">Launch ' . $data['text'] . '</button>';
+            $html .= '<button onclick="lti_consumer_launch(\'' . $id . '\',\'' . $attrs['id'] . '\',\'' . $attrs['resource_link_id'] . '\', false, '.($data['is_in_comments']?'true':'false').', '.$data['id'].')">Launch ' . $data['text'] . '</button>';
         }
-        if ($data['display']=='modal') {
+        if ($data['display']=='modal' || $data['display']=='modal_bootstrap') {
             $arrayLTIModal[$id] .= '<form method="post" action="'.$data['url'].'" target="'.$target.'" id="launch-'.$id.'" data-id="'.$id.'" data-post="'.$data['id'].'" data-auto-launch="'.$autolaunch.'">';
             foreach ( $data['parameters'] as $key => $value ) {
                 $arrayLTIModal[$id] .= '<input type="hidden" name="'.$key.'" value="'.$value.'">';
@@ -476,9 +501,6 @@ function lti_launch_func($attrs) {
             $html .= '</form>';
 
         }
-        
-
-        
     }
 
     return $html;
@@ -486,7 +508,6 @@ function lti_launch_func($attrs) {
 
 
 function show_forms_lti() {
-echo "**ENTRA";
     if (isset($_SESSION['arrayLTIModal'])) {
         $arrayLTIModal = $_SESSION['arrayLTIModal'];
         foreach ($arrayLTIModal as $id => $html) {
@@ -629,6 +650,7 @@ function extract_user_id() {
         //echo $lpl.'<br>';
         return array(
             'user_id' => $current_user->ID,
+            'custom_username' => $current_user->user_login,
             'roles'  => get_current_lti_role($userRole),
 
             'launch_presentation_locale'=>get_bloginfo('language'),
@@ -647,12 +669,43 @@ function extract_user_id() {
 
 function extract_site_id() {
     // Find some relevant information about the site
+    $lti_options = get_option( 'lti_options' );
+    $context_id = get_current_blog_id().(get_the_ID()!=null?get_the_ID():'');
+    //abertranb to get the context_id 
+    if (isset($lti_options['lti_context_id'])) {
+        $context_id = $lti_options['lti_context_id'];
+    }
+    //end
+    
     return array(
-        'context_id' =>  get_current_blog_id().(get_the_ID()!=null?get_the_ID():''),
+        'context_id' =>  $context_id,
         'context_name' => get_bloginfo('name'),//basename(get_permalink()),
         'context_label' => get_bloginfo('name'),//basename(get_permalink()),
         'tool_consumer_instance_url' => get_site_url(),
     );
+}
+
+/**
+ * Function to set extra context information
+ * @return [type] [description]
+ */
+function extract_site_contenxt_info($id) {
+    $total_fields = 2;
+    $lti_options = get_option( 'lti_options' );
+    $array = array(
+        'custom_metadata_fields'  =>  2,
+        'custom_metadata_label_0' =>  'blog_id',
+        'custom_metadata_value_0' =>  get_current_blog_id(),
+        'custom_metadata_label_1' =>  'post_id',
+        'custom_metadata_value_1' =>  $id
+    );
+    if (isset($lti_options['lti_blogType'])) {
+        $array['custom_metadata_label_'.$array['custom_metadata_fields']] = 'blogType';
+        $array['custom_metadata_value_'.$array['custom_metadata_fields']] = $lti_options['lti_blogType'];
+        $array['custom_metadata_fields'] = $array['custom_metadata_fields']+1;
+    }
+
+    return $array;
 }
 
 
@@ -701,6 +754,8 @@ function lti_launch_process($attrs) {
         $parameters = array_merge($parameters, extract_user_id());
         // grab site information
         $parameters = array_merge($parameters, extract_site_id());
+        // grab extra site context information
+        $parameters = array_merge($parameters, extract_site_contenxt_info(array_key_exists('internal_id', $attrs)?$attrs['internal_id']:$attrs['id']));
 
         $post_id = '';
         $text = '';

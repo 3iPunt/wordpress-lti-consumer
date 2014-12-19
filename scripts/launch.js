@@ -38,7 +38,8 @@ function lti_consumer_launch(id, id_lti, resource_link_id_val, is_modal, is_in_c
 
 jQuery(document).ready(function () {
   jQuery('form[data-auto-launch="yes"]').each(function () {
-    lti_consumer_launch(jQuery(this).data('id'));
+    var form = jQuery('form#launch-' + jQuery(this).data('id'));
+    form.submit();//lti_consumer_launch(jQuery(this).data('id'));
   });
 });
 
@@ -65,7 +66,7 @@ eventer(messageEvent,function(e) {
 
     }
     try {
-      setWowzaEmbedId(e.data.embed_id);
+      setUOCMediaEmbedId(e.data.embed_id);
     } catch (e) {
 
     }
