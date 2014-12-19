@@ -228,7 +228,7 @@ function lti_content_inner_custom_box($lti_content) {
       </td>
     </tr>
 
-    <tr>
+    <!--tr>
       <th><label for="lti_add_in_comments_and_post"><?php _e( "Add in comments and post", 'lti-consumer' ); ?></label></th>
       <td>
         <select name="lti_add_in_comments_and_post" id="lti_add_in_comments_and_post">
@@ -236,7 +236,7 @@ function lti_content_inner_custom_box($lti_content) {
             <option <?php echo ($add_in_comments_and_post)?'selected':''; ?> value="1" ><?php echo _e( "Yes", 'lti-consumer' ); ?></option>
         </select>
       </td>
-    </tr>
+    </tr-->
 
     <tr>
       <th><label for="lti_content_field_launch_url"><?php echo _e( "Launch URL", 'lti-consumer' ); ?></label></th>
@@ -253,13 +253,13 @@ function lti_content_inner_custom_box($lti_content) {
       <td><input type="url" id="lti_content_field_return_url" name="lti_content_field_return_url" value="<?php echo esc_attr( $return_url ); ?>" size="35" /></td>
     </tr>
 
-    <tr>
+    <!--tr>
       <th><label for="lti_content_field_version_1_1"><?php _e( "LTI version", 'lti-consumer' ); ?></label></th>
       <td>
         <label>1.1 <input type="radio" <?php checked($version, 'LTI-1p1'); ?> id="lti_content_field_version_1_1" name="lti_content_field_version" value="LTI-1p1" /></label><br>
         <label>1.0 <input type="radio" <?php checked($version, 'LTI-1p0'); ?> id="lti_content_field_version_1_0" name="lti_content_field_version" value="LTI-1p0"  /></label>
       </td>
-    </tr>
+    </tr-->
   </tbody>
 </table>
 
@@ -316,7 +316,7 @@ function lti_content_save_post($post_id) {
     $lti_add_in_comments_and_post = sanitize_text_field($_POST['lti_add_in_comments_and_post']);
     
     $return_url = sanitize_text_field($_POST['lti_content_field_return_url']);
-    $version = sanitize_text_field($_POST['lti_content_field_version']);
+    $version = 'LTI-1p0';//sanitize_text_field($_POST['lti_content_field_version']);
 
     // Update the meta field in the database.
     update_post_meta($post_id, '_lti_meta_consumer_key', $consumer_key);
@@ -648,6 +648,12 @@ function extract_user_id() {
         $current_user = $current_user_obj->data;
         //$lpl = get_bloginfo('language');
         //echo $lpl.'<br>';
+        if (!isset($current_user->user_firstname)) {
+            $current_user->user_firstname = get_user_meta(wp_get_current_user()->ID, 'first_name', true);
+        }
+        if (!isset($current_user->user_lastname)) {
+                $current_user->user_lastname = get_user_meta(wp_get_current_user()->ID, 'last_name', true);
+        }
         return array(
             'user_id' => $current_user->ID,
             'custom_username' => $current_user->user_login,
@@ -788,7 +794,7 @@ function lti_launch_process($attrs) {
             $add_in_comments_and_post = get_post_meta($lti_content->ID, '_lti_meta_add_in_comments_and_post', true);
             $return_url = get_post_meta($lti_content->ID, '_lti_meta_return_url', true);
             $text = $lti_content->post_title;
-            $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p1';
+            $version = get_post_meta($lti_content->ID, '_lti_meta_version', true) or 'LTI-1p0';
         } else {
             return array('error' => 'Lti tool not found.');
         }
@@ -810,7 +816,7 @@ function lti_launch_process($attrs) {
         if ( array_key_exists('version', $attrs) ) {
             $version = $attrs['version'];
         } else if ( !isset($version) ) {
-            $version = 'LTI-1p1';
+            $version = 'LTI-1p0';
         }
 
         if ( array_key_exists('configuration_url', $attrs) ) {
