@@ -113,10 +113,10 @@ function create_lti_post_type_func() {
             ),
             'description' => __('An LTI-compatible tool for content launch'),
             'publicly_queryable' => true,
-            'public' => false, //hide from menu
+            'public' => true, //hide from menu
             'exclude_from_search' => true,
             'has_archive' => true,
-            'show_ui' => false, //hide from menu
+            'show_ui' => true, //hide from menu
             'supports' => array(
                 'title',
                 'editor',
