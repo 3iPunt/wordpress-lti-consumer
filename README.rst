@@ -48,9 +48,5 @@ Options:
 
 Caution!  Since shortcodes are visible to content viewers if their plugin is
 disabled, OAuth secret keys will become visible if this plugin is disabled.
-
-
-
-Copyright (c) 2014 Saltbox Services.
 Licensed under the GPLv3. See the LICENSE.md file for details.
 
