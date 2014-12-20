@@ -10,6 +10,9 @@ shortcode.
 
 Some examples::
 
+  [lti-launch consumer_keyresource_link_id=testcourseplacement1]
+
+
   [lti-launch consumer_key=yourconsumerkey secret_key=yoursecretkey display=iframe configuration_url=http://launcher.saltbox.com/lms/configuration resource_link_id=testcourseplacement1]
   
   
